@@ -1,0 +1,218 @@
+[
+  {
+    "id": "ash",
+    "width": 1186,
+    "height": 1327,
+    "runtime": "assets/ash.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "32e38866a0395aa1183af2a5d4470156acb821d633e28d65ac1f4496e43e939a",
+    "original_in_source_zip": "assets/ash.png"
+  },
+  {
+    "id": "bg0",
+    "width": 1942,
+    "height": 809,
+    "runtime": "assets/bg0.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "de1948f3c046194e8e21b263cc2e2764bb1e5597e322116533f291b1cc6a1820",
+    "original_in_source_zip": "assets/bg0.png"
+  },
+  {
+    "id": "bg1",
+    "width": 1942,
+    "height": 809,
+    "runtime": "assets/bg1.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "b2f897c53499297365dc8a2e300f36d0ae27837595271cb8940558936ee02cce",
+    "original_in_source_zip": "assets/bg1.png"
+  },
+  {
+    "id": "bg2",
+    "width": 1942,
+    "height": 809,
+    "runtime": "assets/bg2.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "fb1454fda4e7e131ce7f38a05299471d339204d20b4fa599450ab0b0548430dd",
+    "original_in_source_zip": "assets/bg2.png"
+  },
+  {
+    "id": "boar",
+    "width": 1536,
+    "height": 1024,
+    "runtime": "assets/boar.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "db7d46f003ad83c96f6f09e6e7b4cbe69b8a7c1fb67a7f4671d5745e424d2881",
+    "original_in_source_zip": "assets/boar.png"
+  },
+  {
+    "id": "buck-attack",
+    "width": 1024,
+    "height": 1536,
+    "runtime": "assets/buck-attack.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "0902fe1147895528a2c98c99d61d89f17a9606c6a7b963eed2ed53fb7e1e4d51",
+    "original_in_source_zip": "assets/buck-attack.png"
+  },
+  {
+    "id": "buck",
+    "width": 1024,
+    "height": 1536,
+    "runtime": "assets/buck.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "c3b91f886bbf7f56f6d3544e5138c2c1f912f597accc129bc263c12aa2f4538c",
+    "original_in_source_zip": "assets/buck.png"
+  },
+  {
+    "id": "cat",
+    "width": 1536,
+    "height": 1024,
+    "runtime": "assets/cat.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "bf50aa14d8824372cd932e057face04eea85a0ab639c3c76b8fdd91eaffda64d",
+    "original_in_source_zip": "assets/cat.png"
+  },
+  {
+    "id": "caveman",
+    "width": 1105,
+    "height": 1423,
+    "runtime": "assets/caveman.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "a64a997173182b446ebd42922b376d13afc6de34accb42e1c882120512b7e550",
+    "original_in_source_zip": "assets/caveman.png"
+  },
+  {
+    "id": "chel",
+    "width": 1024,
+    "height": 1536,
+    "runtime": "assets/chel.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "efff3c421a7114b3b7024866bc917e4765704b95e486ad1f5fdf33aa695c3e2b",
+    "original_in_source_zip": "assets/chel.png"
+  },
+  {
+    "id": "coat",
+    "width": 1254,
+    "height": 1254,
+    "runtime": "assets/coat.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "7ba27ef2a92bb5248b4c17815332451c7babd4f22fd7db6d7cd8de5f9dedc8d8",
+    "original_in_source_zip": "assets/coat.png"
+  },
+  {
+    "id": "fire",
+    "width": 1254,
+    "height": 1254,
+    "runtime": "assets/fire.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "e8348043cd217f12be61c6540e504e509269e064bc101162b1c8b43647f6248f",
+    "original_in_source_zip": "assets/fire.png"
+  },
+  {
+    "id": "herb",
+    "width": 1254,
+    "height": 1254,
+    "runtime": "assets/herb.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "965c0a9eab18611ad14579ce7d31e76419e65326ca483a4a02de2242d8a06ba6",
+    "original_in_source_zip": "assets/herb.png"
+  },
+  {
+    "id": "ice",
+    "width": 1254,
+    "height": 1254,
+    "runtime": "assets/ice.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "5c0c8951f1f618f1d2c11b6a6588092e7d1c1edeb73a8bc65f1d3585b0d9a5cc",
+    "original_in_source_zip": "assets/ice.png"
+  },
+  {
+    "id": "iron",
+    "width": 1254,
+    "height": 1254,
+    "runtime": "assets/iron.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "25c393cdf1b73bddb64e9f19c8dbc7447c59f6f74775dfd31ac48d88e1760426",
+    "original_in_source_zip": "assets/iron.png"
+  },
+  {
+    "id": "june",
+    "width": 1024,
+    "height": 1536,
+    "runtime": "assets/june.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "07af17904d0dfc5d03edb7d9a4a3a1adae96b5197c4e166fedf3e49771143207",
+    "original_in_source_zip": "assets/june.png"
+  },
+  {
+    "id": "mace",
+    "width": 1254,
+    "height": 1254,
+    "runtime": "assets/mace.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "553ed92e2566d5f085e8bace42396555d0c5f8d3e0d955cf8cd672b7ba137048",
+    "original_in_source_zip": "assets/mace.png"
+  },
+  {
+    "id": "rose",
+    "width": 1145,
+    "height": 1374,
+    "runtime": "assets/rose.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "cc146234bce48417d48cd4632424eab2ae91404623e3fb810453d970b671746e",
+    "original_in_source_zip": "assets/rose.png"
+  },
+  {
+    "id": "saber",
+    "width": 1254,
+    "height": 1254,
+    "runtime": "assets/saber.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "0938ee1c5214f27fd1edd63135ced0677878da1724794ce5249d61ed40b55587",
+    "original_in_source_zip": "assets/saber.png"
+  },
+  {
+    "id": "star",
+    "width": 1254,
+    "height": 1254,
+    "runtime": "assets/star.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "6c0c08aa50666638e047ebc175abb14054e65674f51429ad4d08d150cea3188f",
+    "original_in_source_zip": "assets/star.png"
+  },
+  {
+    "id": "su",
+    "width": 1024,
+    "height": 1536,
+    "runtime": "assets/su.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "5a000cfd8df5799ae53d9e45cc1314d71af5f59e918359cc1efbb2efb8704981",
+    "original_in_source_zip": "assets/su.png"
+  },
+  {
+    "id": "vest",
+    "width": 1254,
+    "height": 1254,
+    "runtime": "assets/vest.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "025b3f7c1e3a52030b4ba4ac179a942cc6ef547b641efb59b52616c9cc533c03",
+    "original_in_source_zip": "assets/vest.png"
+  },
+  {
+    "id": "wolf",
+    "width": 1536,
+    "height": 1024,
+    "runtime": "assets/wolf.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "677235a17b0e0f367f3349ff712b2f51ed2d7724b9c987df52ec5c84d433d09e",
+    "original_in_source_zip": "assets/wolf.png"
+  },
+  {
+    "id": "zombie",
+    "width": 1024,
+    "height": 1536,
+    "runtime": "assets/zombie.webp",
+    "compression": "lossless WebP, original dimensions",
+    "sha256": "2a384c5ebc9a1fdb1bedeb075aad90ae0d0862a018f8414ce66a26edc64d29c8",
+    "original_in_source_zip": "assets/zombie.png"
+  }
+]
