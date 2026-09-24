@@ -4,6 +4,7 @@
   const portrait = window.matchMedia('(orientation: portrait)');
   const standaloneQuery = window.matchMedia('(display-mode: standalone)');
   const fullscreenQuery = window.matchMedia('(display-mode: fullscreen)');
+  let immersiveAttempted = false;
 
   function isStandaloneApp() {
     return standaloneQuery.matches || fullscreenQuery.matches || window.navigator.standalone === true;
@@ -13,21 +14,14 @@
     return Boolean(document.fullscreenElement || document.webkitFullscreenElement);
   }
 
-  function createFullscreenGate() {
-    if (document.getElementById('fullscreenGate')) return;
-    const gate = document.createElement('div');
-    gate.id = 'fullscreenGate';
-    gate.className = 'fullscreen-gate';
-    gate.setAttribute('role', 'dialog');
-    gate.setAttribute('aria-modal', 'true');
-    gate.innerHTML = '<div class="fullscreen-card"><span class="fullscreen-mark">✦</span><strong>SUNSET GUARD</strong><p>주소창 없이 전체 화면으로 게임을 시작합니다.<br>게임 화면은 기기 방향과 관계없이 항상 가로 레이아웃을 유지합니다.</p><button id="enterGameFullscreen" type="button">전체화면으로 게임 시작</button><small>전체화면을 종료하면 다시 시작 화면이 표시됩니다.</small></div>';
-    document.body.appendChild(gate);
-    gate.querySelector('#enterGameFullscreen')?.addEventListener('click', enterGameMode);
-  }
-
   function smallestPositive(values, fallback) {
     const valid = values.filter(v => Number.isFinite(v) && v > 0);
     return valid.length ? Math.min(...valid) : fallback;
+  }
+
+  function removeLegacyGates() {
+    document.getElementById('orientationGate')?.remove();
+    document.getElementById('fullscreenGate')?.remove();
   }
 
   function setViewportMetrics() {
@@ -44,8 +38,8 @@
       doc.clientHeight
     ], window.innerHeight));
 
-    // The game always uses landscape logical coordinates. If the device is held
-    // vertically, CSS rotates this logical landscape surface 90 degrees.
+    // The UI always uses landscape logical coordinates. When the handset is
+    // physically portrait, CSS rotates this logical surface 90 degrees.
     const logicalWidth = coarse.matches ? Math.max(physicalWidth, physicalHeight) : physicalWidth;
     const logicalHeight = coarse.matches ? Math.min(physicalWidth, physicalHeight) : physicalHeight;
 
@@ -58,6 +52,7 @@
     root.classList.toggle('mobile-portrait', coarse.matches && portrait.matches);
     root.classList.toggle('mobile-landscape', coarse.matches && !portrait.matches);
     root.classList.toggle('game-fullscreen', isFullscreen() || isStandaloneApp());
+    root.classList.remove('game-blocked');
   }
 
   async function requestFullscreen() {
@@ -92,35 +87,20 @@
     }
   }
 
-  async function enterGameMode() {
-    const button = document.getElementById('enterGameFullscreen');
-    if (button) {
-      button.disabled = true;
-      button.textContent = '전체화면 전환 중…';
-    }
-
+  // Browsers require a user gesture for fullscreen/orientation lock. The game is
+  // already visibly landscape before this runs; the first normal game touch only
+  // upgrades it to immersive fullscreen when the browser permits it.
+  async function tryImmersiveOnFirstTouch() {
+    if (immersiveAttempted || !coarse.matches) return;
+    immersiveAttempted = true;
     await requestFullscreen();
     await lockLandscape();
     settleViewport();
-    syncGates();
-
-    if (button) {
-      button.disabled = false;
-      button.textContent = '전체화면으로 게임 시작';
-    }
   }
 
   async function keepLandscapeLocked() {
     if (!coarse.matches) return;
     if (isFullscreen() || isStandaloneApp()) await lockLandscape();
-  }
-
-  function syncGates() {
-    const fullscreenGate = document.getElementById('fullscreenGate');
-    const needsFullscreen = coarse.matches && !isFullscreen() && !isStandaloneApp();
-    if (fullscreenGate) fullscreenGate.hidden = !needsFullscreen;
-    root.classList.toggle('game-blocked', needsFullscreen);
-    root.classList.toggle('game-fullscreen', isFullscreen() || isStandaloneApp());
   }
 
   function syncWaveState() {
@@ -142,8 +122,8 @@
   }
 
   function syncAll() {
+    removeLegacyGates();
     setViewportMetrics();
-    syncGates();
     syncWaveState();
     keepLandscapeLocked();
   }
@@ -155,13 +135,14 @@
     setTimeout(setViewportMetrics, 300);
   }
 
-  // Old portrait warning is intentionally removed. Landscape is now persistent:
-  // native/app environments lock orientation, browser fallback rotates the game.
-  document.getElementById('orientationGate')?.remove();
-  createFullscreenGate();
+  removeLegacyGates();
   settleViewport();
   keepLandscapeLocked();
   watchWaveState();
+
+  // Capture the first genuine touch/click without stopping the game action.
+  document.addEventListener('pointerdown', tryImmersiveOnFirstTouch, { passive: true, once: true, capture: true });
+  document.addEventListener('touchstart', tryImmersiveOnFirstTouch, { passive: true, once: true, capture: true });
 
   window.addEventListener('pageshow', settleViewport, { passive: true });
   window.addEventListener('orientationchange', settleViewport, { passive: true });
