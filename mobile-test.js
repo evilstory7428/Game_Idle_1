@@ -13,10 +13,32 @@
     document.body.appendChild(gate);
   }
 
+  function smallestPositive(values, fallback) {
+    const valid = values.filter(v => Number.isFinite(v) && v > 0);
+    return valid.length ? Math.min(...valid) : fallback;
+  }
+
   function setViewportMetrics() {
     const viewport = window.visualViewport;
-    const width = viewport?.width || window.innerWidth;
-    const height = viewport?.height || window.innerHeight;
+    const doc = document.documentElement;
+
+    /*
+      Android browsers can disagree about the usable viewport while the URL bar
+      and system navigation are visible. Always use the smallest reported area
+      so the bottom squad row can never be pushed under browser chrome.
+    */
+    const width = Math.floor(smallestPositive([
+      viewport?.width,
+      window.innerWidth,
+      doc.clientWidth
+    ], window.innerWidth));
+
+    const height = Math.floor(smallestPositive([
+      viewport?.height,
+      window.innerHeight,
+      doc.clientHeight
+    ], window.innerHeight));
+
     root.style.setProperty('--mobile-vvw', `${width}px`);
     root.style.setProperty('--mobile-vvh', `${height}px`);
     root.classList.toggle('touch-device', coarse.matches);
@@ -30,18 +52,27 @@
     try { await screen.orientation.lock('landscape'); } catch (_) {}
   }
 
-  createOrientationGate();
-  setViewportMetrics();
-  lockLandscapeWhenPossible();
-
-  const syncAll = () => {
+  function syncAll() {
     setViewportMetrics();
     lockLandscapeWhenPossible();
-  };
+  }
 
-  window.addEventListener('orientationchange', syncAll, { passive: true });
+  function settleViewport() {
+    syncAll();
+    requestAnimationFrame(setViewportMetrics);
+    setTimeout(setViewportMetrics, 80);
+    setTimeout(setViewportMetrics, 300);
+  }
+
+  createOrientationGate();
+  settleViewport();
+
+  window.addEventListener('pageshow', settleViewport, { passive: true });
+  window.addEventListener('orientationchange', settleViewport, { passive: true });
   window.addEventListener('resize', setViewportMetrics, { passive: true });
+  window.addEventListener('focus', setViewportMetrics, { passive: true });
   window.visualViewport?.addEventListener('resize', setViewportMetrics, { passive: true });
+  window.visualViewport?.addEventListener('scroll', setViewportMetrics, { passive: true });
   coarse.addEventListener?.('change', setViewportMetrics);
-  portrait.addEventListener?.('change', syncAll);
+  portrait.addEventListener?.('change', settleViewport);
 })();
