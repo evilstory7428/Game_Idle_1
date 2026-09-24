@@ -1,0 +1,25 @@
+/* Fullscreen mobile game entry. Browser chrome is removed after a user gesture. */
+.fullscreen-gate{display:none}
+
+@media (pointer:coarse) and (orientation:landscape){
+  .fullscreen-gate{position:fixed;inset:0;z-index:9998;display:grid;place-items:center;padding:max(18px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));background:radial-gradient(circle at 50% 38%,#344449,#10191c 72%);color:#f0ebdf;text-align:center;visibility:visible!important;pointer-events:auto!important}
+  .fullscreen-gate[hidden]{display:none!important}
+  .fullscreen-card{width:min(440px,82vw);padding:20px 24px 18px;border:1px solid #a98b5266;border-radius:14px;background:#172428f5;box-shadow:0 20px 70px #000b}
+  .fullscreen-mark{display:grid;place-items:center;width:54px;height:54px;margin:0 auto 10px;border:1px solid #c7a96b88;border-radius:50%;color:#e5c783;font-size:29px}
+  .fullscreen-card strong{display:block;font:700 22px/1.1 Georgia,'Noto Sans KR',serif;letter-spacing:2px;color:#f3e8d0}
+  .fullscreen-card p{margin:10px 0 15px;color:#aeb9ba;font-size:12px;line-height:1.65}
+  .fullscreen-card button{width:100%;min-height:46px;border-color:#e4c990;background:linear-gradient(145deg,#e4c990,#b99b60);color:#1e292b;font-size:13px;font-weight:800}
+  .fullscreen-card button:disabled{opacity:.65}
+  .fullscreen-card small{display:block;margin-top:10px;color:#7f9092;font-size:9px}
+  html.game-blocked body>*:not(.fullscreen-gate):not(.orientation-gate){pointer-events:none!important}
+}
+
+/* Portrait always wins over the fullscreen start overlay. */
+@media (pointer:coarse) and (orientation:portrait){
+  .fullscreen-gate{display:none!important}
+  .orientation-gate[hidden]{display:none!important}
+}
+
+/* Native/PWA/browser fullscreen uses the entire physical app surface. */
+html:fullscreen,html:-webkit-full-screen{width:100%!important;height:100%!important;background:#131b1d!important}
+html:fullscreen body,html:-webkit-full-screen body{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important}
