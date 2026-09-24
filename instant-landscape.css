@@ -1,0 +1,13 @@
+/* Final mobile orientation override.
+   Never show portrait/orientation/start gates. The game surface itself is always landscape. */
+.orientation-gate,.fullscreen-gate{display:none!important;visibility:hidden!important;pointer-events:none!important}
+
+@media (pointer:coarse) and (orientation:portrait){
+  html,body{overflow:hidden!important;background:#131b1d!important}
+  html.force-landscape body>*{visibility:visible!important}
+  html.force-landscape body>*:not([hidden]){pointer-events:auto!important}
+  html.force-landscape .orientation-gate,
+  html.force-landscape .fullscreen-gate{display:none!important;visibility:hidden!important;pointer-events:none!important}
+}
+
+html.force-landscape.game-blocked body>*{pointer-events:auto!important}
