@@ -13,16 +13,6 @@
     return Boolean(document.fullscreenElement || document.webkitFullscreenElement);
   }
 
-  function createOrientationGate() {
-    if (document.getElementById('orientationGate')) return;
-    const gate = document.createElement('div');
-    gate.id = 'orientationGate';
-    gate.className = 'orientation-gate';
-    gate.setAttribute('role', 'status');
-    gate.innerHTML = '<div><span class="rotate-icon">↻</span><strong>가로 화면 전용 게임입니다</strong><p>휴대폰을 가로로 돌려주세요.<br>세로 화면에서는 게임을 플레이할 수 없습니다.</p></div>';
-    document.body.appendChild(gate);
-  }
-
   function createFullscreenGate() {
     if (document.getElementById('fullscreenGate')) return;
     const gate = document.createElement('div');
@@ -30,7 +20,7 @@
     gate.className = 'fullscreen-gate';
     gate.setAttribute('role', 'dialog');
     gate.setAttribute('aria-modal', 'true');
-    gate.innerHTML = '<div class="fullscreen-card"><span class="fullscreen-mark">✦</span><strong>SUNSET GUARD</strong><p>주소창 없이 게임 전체 화면을 사용합니다.<br>가로 화면으로 고정한 뒤 시작합니다.</p><button id="enterGameFullscreen" type="button">전체화면으로 게임 시작</button><small>전체화면을 종료하면 다시 시작 화면으로 돌아옵니다.</small></div>';
+    gate.innerHTML = '<div class="fullscreen-card"><span class="fullscreen-mark">✦</span><strong>SUNSET GUARD</strong><p>주소창 없이 전체 화면으로 게임을 시작합니다.<br>게임 화면은 기기 방향과 관계없이 항상 가로 레이아웃을 유지합니다.</p><button id="enterGameFullscreen" type="button">전체화면으로 게임 시작</button><small>전체화면을 종료하면 다시 시작 화면이 표시됩니다.</small></div>';
     document.body.appendChild(gate);
     gate.querySelector('#enterGameFullscreen')?.addEventListener('click', enterGameMode);
   }
@@ -43,20 +33,28 @@
   function setViewportMetrics() {
     const viewport = window.visualViewport;
     const doc = document.documentElement;
-    const width = Math.floor(smallestPositive([
+    const physicalWidth = Math.floor(smallestPositive([
       viewport?.width,
       window.innerWidth,
       doc.clientWidth
     ], window.innerWidth));
-    const height = Math.floor(smallestPositive([
+    const physicalHeight = Math.floor(smallestPositive([
       viewport?.height,
       window.innerHeight,
       doc.clientHeight
     ], window.innerHeight));
 
-    root.style.setProperty('--mobile-vvw', `${width}px`);
-    root.style.setProperty('--mobile-vvh', `${height}px`);
+    // The game always uses landscape logical coordinates. If the device is held
+    // vertically, CSS rotates this logical landscape surface 90 degrees.
+    const logicalWidth = coarse.matches ? Math.max(physicalWidth, physicalHeight) : physicalWidth;
+    const logicalHeight = coarse.matches ? Math.min(physicalWidth, physicalHeight) : physicalHeight;
+
+    root.style.setProperty('--physical-vw', `${physicalWidth}px`);
+    root.style.setProperty('--physical-vh', `${physicalHeight}px`);
+    root.style.setProperty('--mobile-vvw', `${logicalWidth}px`);
+    root.style.setProperty('--mobile-vvh', `${logicalHeight}px`);
     root.classList.toggle('touch-device', coarse.matches);
+    root.classList.toggle('force-landscape', coarse.matches);
     root.classList.toggle('mobile-portrait', coarse.matches && portrait.matches);
     root.classList.toggle('mobile-landscape', coarse.matches && !portrait.matches);
     root.classList.toggle('game-fullscreen', isFullscreen() || isStandaloneApp());
@@ -118,20 +116,35 @@
   }
 
   function syncGates() {
-    const orientationGate = document.getElementById('orientationGate');
     const fullscreenGate = document.getElementById('fullscreenGate');
-    const isPortrait = coarse.matches && portrait.matches;
-    const needsFullscreen = coarse.matches && !isPortrait && !isFullscreen() && !isStandaloneApp();
-
-    if (orientationGate) orientationGate.hidden = !isPortrait;
+    const needsFullscreen = coarse.matches && !isFullscreen() && !isStandaloneApp();
     if (fullscreenGate) fullscreenGate.hidden = !needsFullscreen;
-    root.classList.toggle('game-blocked', isPortrait || needsFullscreen);
+    root.classList.toggle('game-blocked', needsFullscreen);
     root.classList.toggle('game-fullscreen', isFullscreen() || isStandaloneApp());
+  }
+
+  function syncWaveState() {
+    const active = coarse.matches && window.Game?.phase === 'fight';
+    root.classList.toggle('wave-active', Boolean(active));
+  }
+
+  function watchWaveState() {
+    let previous = null;
+    const tick = () => {
+      const current = window.Game?.phase || '';
+      if (current !== previous) {
+        previous = current;
+        syncWaveState();
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
   }
 
   function syncAll() {
     setViewportMetrics();
     syncGates();
+    syncWaveState();
     keepLandscapeLocked();
   }
 
@@ -142,18 +155,21 @@
     setTimeout(setViewportMetrics, 300);
   }
 
-  createOrientationGate();
+  // Old portrait warning is intentionally removed. Landscape is now persistent:
+  // native/app environments lock orientation, browser fallback rotates the game.
+  document.getElementById('orientationGate')?.remove();
   createFullscreenGate();
   settleViewport();
   keepLandscapeLocked();
+  watchWaveState();
 
   window.addEventListener('pageshow', settleViewport, { passive: true });
   window.addEventListener('orientationchange', settleViewport, { passive: true });
-  window.addEventListener('resize', setViewportMetrics, { passive: true });
+  window.addEventListener('resize', settleViewport, { passive: true });
   window.addEventListener('focus', settleViewport, { passive: true });
   document.addEventListener('fullscreenchange', settleViewport);
   document.addEventListener('webkitfullscreenchange', settleViewport);
-  window.visualViewport?.addEventListener('resize', setViewportMetrics, { passive: true });
+  window.visualViewport?.addEventListener('resize', settleViewport, { passive: true });
   window.visualViewport?.addEventListener('scroll', setViewportMetrics, { passive: true });
   coarse.addEventListener?.('change', syncAll);
   portrait.addEventListener?.('change', settleViewport);
