@@ -1,50 +1,47 @@
 (() => {
   const root = document.documentElement;
   const coarse = window.matchMedia('(pointer: coarse)');
-  const portraitPhone = window.matchMedia('(max-width: 650px) and (orientation: portrait)');
+  const portrait = window.matchMedia('(orientation: portrait)');
 
-  function syncClasses() {
-    root.classList.toggle('touch-device', coarse.matches);
-    root.classList.toggle('portrait-phone', portraitPhone.matches);
+  function createOrientationGate() {
+    if (document.getElementById('orientationGate')) return;
+    const gate = document.createElement('div');
+    gate.id = 'orientationGate';
+    gate.className = 'orientation-gate';
+    gate.setAttribute('role', 'status');
+    gate.innerHTML = '<div><span class="rotate-icon">↻</span><strong>휴대폰을 가로로 돌려주세요</strong><p>서부마을 지키기는 가로 전용 모바일 게임입니다.<br>가로 화면에서 전체 전장과 조작 UI가 한 화면에 표시됩니다.</p></div>';
+    document.body.appendChild(gate);
   }
 
-  function createOrientationHint() {
-    if (document.getElementById('mobileOrientationHint')) return;
-    const hint = document.createElement('div');
-    hint.id = 'mobileOrientationHint';
-    hint.className = 'mobile-orientation-hint';
-    hint.setAttribute('role', 'status');
-    hint.innerHTML = '<span>📱 전장은 <b>가로 화면</b>에서 가장 크게 확인할 수 있습니다. 세로 화면에서도 메뉴와 영웅 관리는 테스트할 수 있어요.</span><button type="button" aria-label="안내 닫기">✕</button>';
-    hint.querySelector('button').addEventListener('click', () => {
-      hint.hidden = true;
-      try { sessionStorage.setItem('sunsetGuardMobileHintDismissed', '1'); } catch (_) {}
-    });
-    const header = document.querySelector('header');
-    header?.insertAdjacentElement('afterend', hint);
-  }
-
-  function syncHint() {
-    createOrientationHint();
-    const hint = document.getElementById('mobileOrientationHint');
-    if (!hint) return;
-    let dismissed = false;
-    try { dismissed = sessionStorage.getItem('sunsetGuardMobileHintDismissed') === '1'; } catch (_) {}
-    hint.hidden = dismissed || !portraitPhone.matches;
-  }
-
-  function setViewportHeight() {
-    const height = window.visualViewport?.height || window.innerHeight;
+  function setViewportMetrics() {
+    const viewport = window.visualViewport;
+    const width = viewport?.width || window.innerWidth;
+    const height = viewport?.height || window.innerHeight;
+    root.style.setProperty('--mobile-vvw', `${width}px`);
     root.style.setProperty('--mobile-vvh', `${height}px`);
+    root.classList.toggle('touch-device', coarse.matches);
+    root.classList.toggle('mobile-portrait', coarse.matches && portrait.matches);
+    root.classList.toggle('mobile-landscape', coarse.matches && !portrait.matches);
   }
 
-  syncClasses();
-  syncHint();
-  setViewportHeight();
+  async function lockLandscapeWhenPossible() {
+    const standalone = window.matchMedia('(display-mode: fullscreen)').matches || window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (!standalone || !screen.orientation?.lock) return;
+    try { await screen.orientation.lock('landscape'); } catch (_) {}
+  }
 
-  const syncAll = () => { syncClasses(); syncHint(); setViewportHeight(); };
+  createOrientationGate();
+  setViewportMetrics();
+  lockLandscapeWhenPossible();
+
+  const syncAll = () => {
+    setViewportMetrics();
+    lockLandscapeWhenPossible();
+  };
+
   window.addEventListener('orientationchange', syncAll, { passive: true });
-  window.addEventListener('resize', syncAll, { passive: true });
-  window.visualViewport?.addEventListener('resize', setViewportHeight, { passive: true });
-  coarse.addEventListener?.('change', syncClasses);
-  portraitPhone.addEventListener?.('change', syncHint);
+  window.addEventListener('resize', setViewportMetrics, { passive: true });
+  window.visualViewport?.addEventListener('resize', setViewportMetrics, { passive: true });
+  coarse.addEventListener?.('change', setViewportMetrics);
+  portrait.addEventListener?.('change', syncAll);
 })();
