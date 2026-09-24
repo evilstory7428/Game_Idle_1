@@ -1,0 +1,13 @@
+{
+  "name": "선셋 가드 - 서부마을 지키기",
+  "short_name": "선셋 가드",
+  "description": "가로 전용 서부 개척지 방치 디펜스 게임",
+  "lang": "ko",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#131b1d",
+  "theme_color": "#161d1e",
+  "categories": ["games"]
+}
