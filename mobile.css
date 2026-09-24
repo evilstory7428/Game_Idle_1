@@ -1,0 +1,68 @@
+/* Mobile test overrides for Sunset Guard / 서부마을 지키기 */
+html{overflow-x:hidden;background:#131b1d}body{min-height:100dvh;overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom);-webkit-tap-highlight-color:transparent}button,.slot,.hero-card,.quick-item,.form-slot{touch-action:manipulation}.mobile-orientation-hint{display:none}
+
+@media (pointer:coarse){
+  button,.iconbtn,.quick-item,.subtabs button,.filters button,.row button,.deploy button{min-height:44px}
+  .menu-toggle{min-width:62px;min-height:62px}
+}
+
+@media (max-width:650px){
+  body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+  header{position:sticky;top:0;z-index:8;padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));background:#131b1df2;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  .shell{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right));padding-bottom:max(90px,calc(72px + env(safe-area-inset-bottom)))}
+  .top{display:grid;grid-template-columns:1fr;align-items:start;gap:10px}
+  .battle-controls{display:grid;grid-template-columns:1fr 1fr;width:100%;gap:8px}
+  .battle-controls button{width:100%;padding:10px 12px}
+  .wallet{gap:8px}.currency{grid-template-columns:16px auto;column-gap:4px}.currency i{font-size:17px}.currency small{display:none}
+  .battle{border-radius:10px}
+  .battlehud{gap:6px}.glass{flex:1;min-width:0;max-width:49%;padding:7px 8px}.glass b{margin-left:3px}.wavebox{min-width:0}
+  .squad{display:flex;overflow-x:auto;overflow-y:hidden;gap:8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding:2px 2px 8px;scrollbar-width:none}
+  .squad::-webkit-scrollbar{display:none}
+  .slot{flex:0 0 112px;min-width:112px;height:118px;scroll-snap-align:start;border-radius:10px}
+  .slot img{width:48px;height:58px}.empty-icon{height:54px}
+  .bottomline{align-items:flex-end;gap:10px}.bottomline .textbtn{min-height:44px;padding:8px 6px;white-space:nowrap}
+  footer{padding-right:72px;line-height:1.55}
+  .launcher{right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom))}
+  .launcher nav{grid-template-columns:repeat(2,minmax(104px,1fr));max-width:calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));max-height:calc(100dvh - 110px);overflow:auto}
+  .drawer{top:max(6px,env(safe-area-inset-top));right:max(6px,env(safe-area-inset-right));bottom:max(6px,env(safe-area-inset-bottom));left:max(6px,env(safe-area-inset-left));width:auto;max-height:calc(100dvh - max(12px,env(safe-area-inset-top)) - max(12px,env(safe-area-inset-bottom)))}
+  .content{padding-bottom:max(24px,env(safe-area-inset-bottom))}
+  .hero-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero-card .art{height:145px}.hero-card img{height:225px}
+  .filters,.subtabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+  .filters::-webkit-scrollbar,.subtabs::-webkit-scrollbar{display:none}
+  .filters button,.subtabs button{flex:0 0 auto;white-space:nowrap}
+  .row{align-items:center}.row button{min-width:76px}
+  .toast{bottom:max(86px,calc(72px + env(safe-area-inset-bottom)));max-width:calc(100vw - 28px);width:max-content}
+}
+
+@media (max-width:430px){
+  header{height:62px}.brand{font-size:14px}.brand small{display:none}
+  .wallet{gap:5px}.currency{font-size:12px}.iconbtn{width:40px;height:40px}
+  .shell{padding-top:12px}.top h1{font-size:17px}
+  .battlehud{top:6px;left:6px;right:6px}.glass{font-size:8px;padding:6px}.glass .eyebrow{font-size:6px;letter-spacing:1px}
+  .battle-caption{display:none}
+  .bottomline h2 span{display:block;margin:2px 0 0}
+  .hero-profile{align-items:flex-start}.hero-profile img{width:82px;height:108px}.hero-profile h2{font-size:19px}
+  .status-summary,.stats{grid-template-columns:1fr}
+  .equipment-slots{grid-template-columns:repeat(2,1fr)}
+  .row{flex-wrap:wrap}.row .grow{min-width:calc(100% - 62px)}.row button{margin-left:auto}
+  .panelwallet{flex-wrap:wrap;row-gap:4px}
+}
+
+@media (max-width:650px) and (orientation:portrait){
+  .mobile-orientation-hint{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px max(10px,env(safe-area-inset-left)) 0;padding:9px 11px;border:1px solid #a98b5266;border-radius:9px;background:#2a342ff2;color:#ead9b4;font-size:11px;line-height:1.4;position:relative;z-index:7}
+  .mobile-orientation-hint[hidden]{display:none!important}
+  .mobile-orientation-hint button{min-width:36px;min-height:36px;padding:0;border-radius:8px}
+  .battle{margin-top:2px}
+}
+
+@media (max-height:550px) and (orientation:landscape){
+  header{position:relative;height:50px}
+  .shell{padding-top:8px;padding-bottom:max(70px,calc(54px + env(safe-area-inset-bottom)))}
+  .top{display:flex;align-items:end;gap:10px}.top>div:first-child{min-width:0}.top h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .battle-controls{display:flex;width:auto}.battle-controls button{width:auto;min-height:40px}
+  .battlehud{top:6px;left:6px;right:6px}.glass{padding:5px 8px}
+  .bottomline{margin:10px 0 8px}.squad{gap:6px}.slot{height:82px;flex-basis:104px}.slot img{height:42px;width:38px}
+  footer{margin-top:10px}
+  .launcher nav{grid-template-columns:repeat(3,92px);max-height:calc(100dvh - 84px)}
+}
