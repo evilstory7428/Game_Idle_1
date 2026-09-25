@@ -34,7 +34,7 @@
   if(type==='berserker'){e.rage=false;}
   if(type==='phase'){e.armor=.18;e.phaseTimer=2.6;}
   if(type==='swarm'){e.hp*=.78;e.max=e.hp;e.swarmTimer=3.5;}
-  if(e.boss){e.armor=Math.max(e.armor,e.actBoss?.18:.1);e.shield=e.max*(e.actBoss?.12:.05);}
+  if(e.boss){e.armor=Math.max(e.armor,e.actBoss ? .18 : .1);e.shield=e.max*(e.actBoss ? .12 : .05);}
   return e;
  }
  spawn=function(){
@@ -52,7 +52,7 @@
   if(e.summonLeft<=0||enemies.length>42)return;
   const info=Campaign.at(state.wave),n=Math.min(count,e.summonLeft);e.summonLeft-=n;
   for(let i=0;i<n;i++){
-   const kind=(e.kind+i+1)%3,hp=Math.max(20,e.max*(e.actBoss?.07:.11)),damage=Math.max(1,e.damage*.38);
+   const kind=(e.kind+i+1)%3,hp=Math.max(20,e.max*(e.actBoss ? .07 : .11)),damage=Math.max(1,e.damage*.38);
    const m={x:e.x+35+i*18,y:Math.max(330,Math.min(495,e.y-25+i*30)),hp,max:hp,damage,speed:32+info.act,kind,boss:false,main:false,actBoss:false,name:info.mobs[kind]+' 소환체',faction:info.actTitle,slow:0,burn:0,burnTime:0,stun:0,hit:0,attack:0,summoned:true};
    decorateEnemy(m);m.summoned=true;m.summonLeft=0;m.hp=hp;m.max=hp;m.damage=damage;m.baseDamage=damage;enemies.push(m);
   }
@@ -61,12 +61,12 @@
  function bossSkill(e){
   const mode=e.archetype;
   if(mode==='boss-assault'){
-   partyDamage(e.damage*(e.actBoss?.72:.5),'보스 충격파');
+   partyDamage(e.damage*(e.actBoss ? .72 : .5),'보스 충격파');
    e.chargeTime=1.2;e.baseSpeed=Math.max(e.baseSpeed||e.speed,e.speed)*1.12;
   }else if(mode==='boss-summon'){
    summonFrom(e,e.actBoss?2:1);e.hp=Math.min(e.max,e.hp+e.max*.035);
   }else{
-   e.shield+=e.max*(e.actBoss?.1:.06);e.hp=Math.min(e.max,e.hp+e.max*.025);
+   e.shield+=e.max*(e.actBoss ? .1 : .06);e.hp=Math.min(e.max,e.hp+e.max*.025);
    effects.push({type:'text',x:e.x,y:e.y-65,t:.9,text:'보호막',color:'#a9f0e4'});
   }
  }
