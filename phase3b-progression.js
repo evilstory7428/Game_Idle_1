@@ -1,0 +1,115 @@
+'use strict';
+/* Phase 3B — long-term economy, gear quality, farming, missions and achievements.
+   Loaded after phase3-polish so it can rebalance the final wrapped combat/save/UI layer. */
+(()=>{
+ if(!window.Game||!window.HeroV3||!window.EquipmentV3||typeof Campaign==='undefined')return;
+ const previous={spawn,stats,save,migrate,renderPanel,update,buy,upgrade,upgradeTown};
+ const RARITIES=[
+  {id:'common',name:'일반',factor:1,scrap:5},
+  {id:'uncommon',name:'고급',factor:1.08,scrap:9},
+  {id:'rare',name:'희귀',factor:1.18,scrap:15},
+  {id:'epic',name:'영웅',factor:1.32,scrap:25},
+  {id:'legendary',name:'전설',factor:1.5,scrap:42}
+ ];
+ const DAILY=[
+  {id:'waves',label:'웨이브 20회 방어',event:'wave',target:20,reward:{gold:1800,gems:8,scrap:12}},
+  {id:'bosses',label:'Elite 이상 2회 격파',event:'boss',target:2,reward:{gold:2400,gems:10,scrap:18}},
+  {id:'enhance',label:'장비 1회 강화',event:'enhance',target:1,reward:{gold:1200,gems:5,scrap:16}},
+  {id:'recruit',label:'영웅 모집 1회',event:'recruit',target:1,reward:{gold:1000,gems:8,scrap:10}}
+ ];
+ const WEEKLY=[
+  {id:'waves',label:'웨이브 150회 방어',event:'wave',target:150,reward:{gold:18000,gems:50,scrap:90}},
+  {id:'bosses',label:'Elite 이상 12회 격파',event:'boss',target:12,reward:{gold:22000,gems:60,scrap:110}},
+  {id:'enhance',label:'장비 8회 강화',event:'enhance',target:8,reward:{gold:16000,gems:40,scrap:120}},
+  {id:'recruit',label:'영웅 모집 5회',event:'recruit',target:5,reward:{gold:12000,gems:50,scrap:80}}
+ ];
+ const ACHIEVEMENTS=[
+  {id:'wave100',label:'국경 수비대',desc:'WAVE 100 도달',value:()=>state.best,target:100,reward:{gold:4000,gems:20,scrap:20}},
+  {id:'wave500',label:'Act 돌파자',desc:'WAVE 500 도달',value:()=>state.best,target:500,reward:{gold:18000,gems:70,scrap:70}},
+  {id:'wave1000',label:'황혼의 베테랑',desc:'WAVE 1,000 도달',value:()=>state.best,target:1000,reward:{gold:50000,gems:120,scrap:150}},
+  {id:'wave2500',label:'변경의 전설',desc:'WAVE 2,500 도달',value:()=>state.best,target:2500,reward:{gold:180000,gems:250,scrap:300}},
+  {id:'wave5000',label:'마지막 지평선',desc:'WAVE 5,000 완료',value:()=>state.campaignCleared?5000:state.best,target:5000,reward:{gold:500000,gems:500,scrap:600}},
+  {id:'boss50',label:'현상금 사냥꾼',desc:'보스 누적 50회 격파',value:()=>economy().counters.boss,target:50,reward:{gold:50000,gems:80,scrap:140}},
+  {id:'enhance25',label:'개척지의 대장장이',desc:'장비 강화 누적 25회',value:()=>economy().counters.enhance,target:25,reward:{gold:35000,gems:60,scrap:180}},
+  {id:'seven',label:'일곱 개척자',desc:'영웅 7명 모두 모집',value:()=>state.owned.length,target:7,reward:{gold:30000,gems:100,scrap:100}}
+ ];
+ function dayKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+ function weekKey(d=new Date()){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()),day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);return dayKey(x)}
+ function freshMission(key){return {key,progress:{},claimed:{}}}
+ function economy(s=state){
+  s.progression??={};const p=s.progression;p.economy??={};const e=p.economy;
+  e.scrap=Number.isFinite(e.scrap)?Math.max(0,Math.floor(e.scrap)):0;
+  e.gearMeta=e.gearMeta&&typeof e.gearMeta==='object'?e.gearMeta:{};
+  e.counters=e.counters&&typeof e.counters==='object'?e.counters:{};
+  for(const k of ['wave','boss','enhance','recruit','drops','farmRuns'])e.counters[k]=Number.isInteger(e.counters[k])?Math.max(0,e.counters[k]):0;
+  e.achievements=e.achievements&&typeof e.achievements==='object'?e.achievements:{};
+  const dk=dayKey(),wk=weekKey();if(e.daily?.key!==dk)e.daily=freshMission(dk);if(e.weekly?.key!==wk)e.weekly=freshMission(wk);
+  for(const id of s.inventory||[])ensureMeta(id,s);
+  return e;
+ }
+ function rarityIndex(id){return Math.max(0,RARITIES.findIndex(r=>r.id===id))}
+ function rarityOf(itemId,s=state){return RARITIES.find(r=>r.id===economy(s).gearMeta[itemId]?.rarity)||RARITIES[0]}
+ function ensureMeta(itemId,s=state,rarity='common',wave=s.wave||1){const e=economyShallow(s),m=e.gearMeta[itemId]||(e.gearMeta[itemId]={rarity,level:0,acquiredWave:wave});if(!RARITIES.some(r=>r.id===m.rarity))m.rarity='common';m.level=Number.isInteger(m.level)?Math.max(0,Math.min(20,m.level)):0;return m}
+ function economyShallow(s){s.progression??={};s.progression.economy??={scrap:0,gearMeta:{},counters:{},achievements:{}};const e=s.progression.economy;e.gearMeta??={};return e}
+ function rollRarity(wave=state.wave){
+  const act=Campaign.at(wave).act,weights=[Math.max(24,69-act*4),23+act,6+act*1.6,Math.max(1,act-2)*1.35,Math.max(0,act-4)*.72];
+  let total=weights.reduce((a,b)=>a+b,0),r=Math.random()*total;for(let i=0;i<weights.length;i++){r-=weights[i];if(r<=0)return RARITIES[i]}return RARITIES[0]
+ }
+ function grant(reward,mult=1){const e=economy();const gold=Math.round((reward.gold||0)*mult),gems=Math.round((reward.gems||0)*mult),scrap=Math.round((reward.scrap||0)*mult);state.gold+=gold;state.gems+=gems;e.scrap+=scrap;return {gold,gems,scrap}}
+ function rewardText(r){return `◈ ${money(r.gold)} · ✧ ${r.gems} · 부품 ${r.scrap}`}
+ function record(event,amount=1){const e=economy();e.counters[event]=(e.counters[event]||0)+amount;for(const bucket of [e.daily,e.weekly])bucket.progress[event]=(bucket.progress[event]||0)+amount}
+ function missionValue(bucket,m){return Math.min(m.target,bucket.progress[m.event]||0)}
+ function claimMission(scope,id){const e=economy(),defs=scope==='daily'?DAILY:WEEKLY,b=e[scope],m=defs.find(x=>x.id===id);if(!m||b.claimed[id]||missionValue(b,m)<m.target)return false;b.claimed[id]=Date.now();const r=grant(m.reward);save();toast(`${scope==='daily'?'일일':'주간'} 목표 보상 · ${rewardText(r)}`);renderPanel();return true}
+ function claimAchievement(id){const e=economy(),a=ACHIEVEMENTS.find(x=>x.id===id);if(!a||e.achievements[id]||a.value()<a.target)return false;e.achievements[id]=Date.now();const r=grant(a.reward);save();toast(`업적 완료 · ${a.label} · ${rewardText(r)}`);renderPanel();return true}
+ function balanceAt(wave=state.wave){
+  const w=Math.max(1,Math.min(5000,wave)),info=Campaign.at(w),act=info.act;
+  const hp=(38+w*.35)*Math.pow(1+w/650,1.32)*Math.pow(1.08,act-1);
+  const damage=(4+w*.035)*Math.pow(1+w/800,.95)*Math.pow(1.06,act-1);
+  const bossHp=info.isActBoss?24:info.isRegionBoss?12:info.isElite?4.6:1;
+  const bossDamage=info.isActBoss?3.5:info.isRegionBoss?2.55:info.isElite?1.75:1;
+  return {hp,damage,bossHp,bossDamage,killGold:Math.round(7+Math.pow(w,0.82)*1.45),clearGold:Math.round(24*Math.pow(1+w/85,1.08)*act)};
+ }
+ spawn=function(){
+  previous.spawn();const e=enemies[enemies.length-1];if(!e)return;const b=balanceAt(),typeHp={runner:.82,tank:1.65,brute:1.35,support:1.15,swarm:.78}[e.archetype]||1,typeDamage=e.archetype==='brute'?1.35:1;
+  const hp=b.hp*(e.boss?b.bossHp:1)*typeHp*(e.summoned?.12:1),dmg=b.damage*(e.boss?b.bossDamage:1)*typeDamage*(e.summoned?.38:1);
+  e.hp=e.max=Math.max(20,hp);e.damage=e.baseDamage=Math.max(1,dmg);if(e.boss)e.shield=e.max*(e.actBoss?.14:.06);
+ };
+ stats=function(id){const s=previous.stats(id),eq=Object.values(state.gear[id]||{}),bonus=eq.reduce((n,itemId)=>{const m=ensureMeta(itemId),r=rarityOf(itemId);return n+(r.factor-1)+m.level*.022},0);if(!bonus)return s;return {...s,atk:s.atk*(1+bonus),hp:s.hp*(1+bonus*.72),regen:s.regen*(1+bonus*.45),crit:Math.min(.85,s.crit+bonus*.025),critD:s.critD+bonus*.08};};
+ const heroAmount={value:1},townAmount={value:1};
+ function heroCost(i,amount=heroAmount.value){let total=0,lv=level(selected)[i];for(let n=0;n<amount&&lv+n<500;n++)total+=Math.ceil((42+i*7)*Math.pow(1.012,lv+n)*(1+(lv+n)/55));return total}
+ function townLimit(i){return i===2?30:500}
+ function townCost2(i,amount=townAmount.value){let total=0,lv=state.town[i];for(let n=0;n<amount&&lv+n<townLimit(i);n++)total+=Math.ceil((120+i*75)*Math.pow(1.014,lv+n)*(1+(lv+n)/48));return total}
+ upgrade=function(i){if(!Number.isInteger(i)||i<0||i>23||i===18||i===19)return;const amount=Math.min(heroAmount.value,500-level(selected)[i]);if(amount<=0)return;const c=heroCost(i,amount);if(state.gold<c)return toast('골드가 부족합니다.');state.gold-=c;state.levels[selected][i]+=amount;changed();playSfx('upgrade')};
+ upgradeTown=function(i){if(!Number.isInteger(i)||i<0||i>3)return;const amount=Math.min(townAmount.value,townLimit(i)-state.town[i]);if(amount<=0)return;const c=townCost2(i,amount);if(state.gold<c)return toast('골드가 부족합니다.');state.gold-=c;state.town[i]+=amount;if(i===0)baseHP+=35*amount;changed();playSfx('upgrade')};
+ function enhanceCost(itemId){const m=ensureMeta(itemId),ri=rarityIndex(m.rarity);return {gold:Math.ceil(260*Math.pow(m.level+1,1.45)*(1+ri*.38)),scrap:6+m.level*3+ri*5}}
+ function enhanceGear(itemId){if(!state.inventory.includes(itemId))return false;const m=ensureMeta(itemId);if(m.level>=20)return toast('최대 강화 단계입니다.');const c=enhanceCost(itemId),e=economy();if(state.gold<c.gold||e.scrap<c.scrap)return toast('강화 재료 또는 골드가 부족합니다.');state.gold-=c.gold;e.scrap-=c.scrap;m.level++;record('enhance');save();changed();toast(`${items.find(x=>x.id===itemId)?.name||'장비'} +${m.level} 강화 완료`);return true}
+ function gearDrop(wave=state.wave,forced=false,rewardScale=1){
+  const info=Campaign.at(wave),chance=forced?1:info.isActBoss?1:info.isRegionBoss?.62:info.isElite?.22:.025;if(Math.random()>chance)return null;
+  const item=items[Math.floor(Math.random()*items.length)],e=economy();if(!item)return null;
+  if(state.inventory.includes(item.id)){const r=rarityOf(item.id),gain=Math.max(1,Math.round(r.scrap*(info.isActBoss?3:info.isRegionBoss?2:1)*rewardScale));e.scrap+=gain;record('drops');return {duplicate:true,item,scrap:gain}}
+  const rarity=rollRarity(wave);state.inventory.push(item.id);ensureMeta(item.id,state,rarity.id,wave);record('drops');return {duplicate:false,item,rarity};
+ }
+ let farmSession=null;
+ function startFarm(w){const cp=Math.floor(Number(w));if(!Number.isInteger(cp)||cp<100||cp>state.best||cp%100!==1&&cp%100!==0)return false;const wave=cp%100===1?cp-1:cp;if(wave<100)return false;if(farmSession)exitFarm(false);farmSession={wave,homeWave:state.wave,homeBest:state.best,runs:0};state.wave=wave;resetWave();hud();toast(`WAVE ${wave.toLocaleString('ko-KR')} 체크포인트 반복 파밍 시작`);renderPanel();return true}
+ function exitFarm(notify=true){if(!farmSession)return;const home=farmSession;farmSession=null;state.wave=home.homeWave;state.best=Math.max(home.homeBest,state.best);resetWave();save();hud();renderPanel();if(notify)toast('체크포인트 파밍 종료 · 본 전선으로 복귀했습니다.')}
+ save=function(){economy();if(!farmSession)return previous.save();const w=state.wave,b=state.best;state.wave=farmSession.homeWave;state.best=farmSession.homeBest;try{return previous.save()}finally{state.wave=w;state.best=b}};
+ migrate=function(p){const out=previous.migrate(p);if(out?.version===3)economy(out);return out};
+ function completionReward(wave,farm=false){const b=balanceAt(wave),info=Campaign.at(wave),mult=farm?.55:1,boss=wave%10===0;const r=grant({gold:Math.round(b.clearGold*(boss?(info.isActBoss?5:info.isRegionBoss?3:1.7):1)),gems:boss?(info.isActBoss?8:info.isRegionBoss?3:1):0,scrap:Math.max(1,Math.round((2+info.act*.7)*(boss?2:1)))},mult);record('wave');if(boss)record('boss');const drop=gearDrop(wave,false,mult);if(drop&&!farm)toast(drop.duplicate?`${drop.item.name} 중복 · 부품 +${drop.scrap}`:`${drop.rarity.name} 장비 획득 · ${drop.item.name}`);return r}
+ update=function(dt){const before=state.wave,clearedBefore=!!state.campaignCleared;previous.update(dt);const advanced=state.wave>before||(!clearedBefore&&state.campaignCleared);if(advanced&&!testMode){completionReward(before,!!farmSession);if(farmSession){farmSession.runs++;economy().counters.farmRuns++;state.wave=farmSession.wave;state.best=farmSession.homeBest;state.campaignCleared=false;resetWave();hud();save();if(farmSession.runs%5===0)toast(`체크포인트 파밍 ${farmSession.runs}회 완료`)}else save()}};
+ buy=function(kind){const beforeDraws=state.draws,beforeInv=new Set(state.inventory);previous.buy(kind);if(testMode)return;if(kind==='hero'&&state.draws>beforeDraws)record('recruit');if(kind==='gear'){
+  const added=state.inventory.find(id=>!beforeInv.has(id));if(added){const m=ensureMeta(added),rarity=rollRarity();m.rarity=rarity.id;m.acquiredWave=state.wave;toast(`${rarity.name} 장비 보급 · ${items.find(x=>x.id===added)?.name||added}`)}else{const e=economy();e.scrap+=10;toast('중복 장비 · 120골드 + 부품 10개')}save();renderPanel()}
+ };
+ function gearMetaLabel(id){const m=ensureMeta(id),r=rarityOf(id);return `<span class="gear-rarity rarity-${r.id}">${r.name}</span> <b>+${m.level}</b>`}
+ function missionCard(scope,m){const e=economy(),b=e[scope],v=missionValue(b,m),done=v>=m.target,claimed=!!b.claimed[m.id];return `<div class="mission-row"><div class="grow"><strong>${m.label}</strong><p>${v.toLocaleString('ko-KR')} / ${m.target.toLocaleString('ko-KR')} · ${rewardText(m.reward)}</p><div class="mission-bar"><i style="width:${Math.min(100,v/m.target*100)}%"></i></div></div><button data-claim-mission="${scope}:${m.id}" ${!done||claimed?'disabled':''}>${claimed?'수령 완료':done?'보상 받기':'진행 중'}</button></div>`}
+ function economyPanel(){const e=economy(),checkpoints=[...(state.progression.checkpoints||[])].map(w=>w%100===1?w-1:w).filter(w=>w>=100&&w<=state.best).sort((a,b)=>b-a).slice(0,6);return `<section class="phase3b-economy"><div class="sectionline"><strong>개척지 경제</strong><small>부품 ${money(e.scrap)}</small></div><div class="economy-grid"><div><small>장비 강화</small><b>${e.counters.enhance}회</b></div><div><small>장비 획득</small><b>${e.counters.drops}회</b></div><div><small>반복 파밍</small><b>${e.counters.farmRuns}회</b></div></div></section><section class="phase3b-missions"><div class="sectionline"><strong>일일 목표</strong><small>${e.daily.key}</small></div>${DAILY.map(m=>missionCard('daily',m)).join('')}<div class="sectionline phase3b-space"><strong>주간 목표</strong><small>${e.weekly.key} 시작 주</small></div>${WEEKLY.map(m=>missionCard('weekly',m)).join('')}</section><section class="phase3b-achievements"><div class="sectionline"><strong>업적</strong><small>${Object.keys(e.achievements).length} / ${ACHIEVEMENTS.length}</small></div>${ACHIEVEMENTS.map(a=>{const v=Math.min(a.target,a.value()),done=v>=a.target,claimed=!!e.achievements[a.id];return `<div class="achievement-row"><div><strong>${a.label}</strong><p>${a.desc} · ${v.toLocaleString('ko-KR')} / ${a.target.toLocaleString('ko-KR')}</p></div><button data-claim-achievement="${a.id}" ${!done||claimed?'disabled':''}>${claimed?'완료':done?'수령':'잠김'}</button></div>`}).join('')}</section><section class="phase3b-farm"><div class="sectionline"><strong>체크포인트 파밍</strong><small>${farmSession?`WAVE ${farmSession.wave} · ${farmSession.runs}회`:'본 진행을 유지한 반복 전투'}</small></div><p class="help">100웨이브 단위 보스 구간을 반복해 골드·부품·장비를 획득합니다. 반복 파밍 보상은 본 전선의 55%이며 최초 보스 보상은 중복 지급되지 않습니다.</p><div class="phase3-checkpoints">${farmSession?'<button data-stop-farm class="primary">본 전선으로 복귀</button>':checkpoints.map(w=>`<button data-farm-wave="${w}">WAVE ${w.toLocaleString('ko-KR')}</button>`).join('')||'<span class="dim">WAVE 100을 돌파하면 활성화됩니다.</span>'}</div></section>`}
+ function patchUI(){if($('drawer').hidden)return;const content=$('content');if(tab==='영웅'&&detail){content.querySelectorAll('[data-up]').forEach(b=>{const i=+b.dataset.up,amount=Math.min(heroAmount.value,500-level(selected)[i]),c=heroCost(i,amount);b.dataset.cost=c;b.disabled=amount<=0||state.gold<c;b.textContent=amount?`${amount}회 · ◈ ${money(c)}`:'최대 강화'});if(heroTab==='장비')content.querySelectorAll('[data-equip]').forEach(b=>{const id=b.dataset.equip,row=b.closest('.row'),item=items.find(x=>x.id===id);if(!row||!item||row.querySelector('.phase3b-gear-meta'))return;const m=ensureMeta(id),cost=enhanceCost(id);row.querySelector('.grow')?.insertAdjacentHTML('beforeend',`<div class="phase3b-gear-meta">${gearMetaLabel(id)} · 다음 강화 ${m.level>=20?'MAX':`◈ ${money(cost.gold)} / 부품 ${cost.scrap}`}</div>`);row.insertAdjacentHTML('beforeend',`<button data-gear-upgrade="${id}" ${m.level>=20||state.gold<cost.gold||economy().scrap<cost.scrap?'disabled':''}>${m.level>=20?'MAX':'+ 강화'}</button>`)});}
+ if(tab==='마을'){let bar=content.querySelector('.phase3-bulk');if(!bar){const notice=content.querySelector('.notice');notice?.insertAdjacentHTML('afterend',`<div class="phase3-bulk"><span>마을 강화 횟수</span>${[1,10,100].map(n=>`<button data-phase3b-town="${n}" class="${townAmount.value===n?'active':''}">${n}회</button>`).join('')}</div>`)}content.querySelectorAll('[data-town]').forEach(b=>{const i=+b.dataset.town,amount=Math.min(townAmount.value,townLimit(i)-state.town[i]),c=townCost2(i,amount);b.dataset.cost=c;b.disabled=amount<=0||state.gold<c;b.textContent=amount?`${amount}회 · ◈ ${money(c)}`:'최대 강화'})}
+ if(tab==='설정'&&!content.querySelector('.phase3b-economy'))content.insertAdjacentHTML('beforeend',economyPanel());
+ }
+ renderPanel=function(){previous.renderPanel();patchUI();PixelArt.paint()};
+ $('content').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.phase3Hero){heroAmount.value=+b.dataset.phase3Hero;renderPanel()}if(b.dataset.phase3Town){townAmount.value=+b.dataset.phase3Town;renderPanel()}if(b.dataset.phase3bTown){townAmount.value=+b.dataset.phase3bTown;renderPanel()}if(b.dataset.gearUpgrade)enhanceGear(b.dataset.gearUpgrade);if(b.dataset.claimMission){const [scope,id]=b.dataset.claimMission.split(':');claimMission(scope,id)}if(b.dataset.claimAchievement)claimAchievement(b.dataset.claimAchievement);if(b.dataset.farmWave)startFarm(+b.dataset.farmWave);if(b.dataset.stopFarm!==undefined)exitFarm()});
+ economy();for(const id of state.inventory)ensureMeta(id);save();renderSquad();hud();
+ Game.spawn=spawn;Game.stats=stats;Game.save=save;Game.migrate=migrate;Game.renderPanel=renderPanel;Game.update=update;Game.buy=buy;Game.upgrade=upgrade;Game.upgradeTown=upgradeTown;
+ Game.phase3b={RARITIES,DAILY,WEEKLY,ACHIEVEMENTS,balanceAt,economy,rollRarity,rarityOf,enhanceGear,enhanceCost,gearDrop,claimMission,claimAchievement,startFarm,exitFarm,get farm(){return farmSession},setHeroAmount:n=>heroAmount.value=[1,10,100].includes(n)?n:1,setTownAmount:n=>townAmount.value=[1,10,100].includes(n)?n:1};
+ window.Phase3B=Game.phase3b;
+})();
