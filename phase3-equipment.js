@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
  if(!window.Game||!window.HeroV3||!window.EquipmentV3Pre)return;
- const V3_KEY='sunset-guard-v3-seven',LEGACY_KEY='sunset-guard-v2';
+ const LEGACY_KEY='sunset-guard-v2';
  const LEGACY_HERO_IDS=['su','chel','buck','rose','june','ash'];
  const LEGACY_ITEM_IDS=['iron','fire','ice','vest','coat','star','herb','mace','saber'];
  const phase3Save=save,phase3Migrate=migrate,phase3Render=renderPanel,phase3Paint=PixelArt.paint;
@@ -15,16 +15,16 @@
   const gear={};for(const id of s.owned){const src=s.gear?.[id]||{},eq={};if(LEGACY_ITEM_IDS.includes(src.weapon))eq.weapon=src.weapon;if(['vest','coat'].includes(src.outfit))eq.armor=src.outfit;if(src.badge==='star')eq.charm='star';else if(src.necklace==='herb')eq.charm='herb';gear[id]=eq}s.gear=gear;
   s.inventory=(s.inventory||[]).filter(id=>LEGACY_ITEM_IDS.includes(id));return s;
  }
- save=function(){phase3Save();if(testMode||saveRecovery)return;try{localStorage.setItem(LEGACY_KEY,JSON.stringify(legacyShadow()))}catch{}}
- function gearSlots(){return `<div class="equipment-slots paperdoll"><div class="paperdoll-hero">${imageTag(selected,'',hero(selected).name)}</div>`+Object.entries(slotNames).map(([k,n])=>{const item=items.find(x=>x.id===state.gear[selected]?.[k]);return `<button class="equipment-slot ${item?'equipped':''} ${equipmentSlot===k?'active':''}" data-v3-gear-slot="${k}" style="grid-area:${k}" aria-label="${n}: ${item?item.name:'미착용'}"><small>${n}</small>${item?imageTag(item.id,'',item.name):'<span class="empty-gear">＋</span>'}<span>${item?item.name:'미착용'}</span></button>`}).join('')+'</div>'}
- function gearInventory(){
+ save=function(){phase3Save();if(testMode||saveRecovery)return;try{localStorage.setItem(LEGACY_KEY,JSON.stringify(legacyShadow()))}catch{}};
+ gearSlots=function(){return `<div class="equipment-slots paperdoll"><div class="paperdoll-hero">${imageTag(selected,'',hero(selected).name)}</div>`+Object.entries(slotNames).map(([k,n])=>{const item=items.find(x=>x.id===state.gear[selected]?.[k]);return `<button class="equipment-slot ${item?'equipped':''} ${equipmentSlot===k?'active':''}" data-v3-gear-slot="${k}" style="grid-area:${k}" aria-label="${n}: ${item?item.name:'미착용'}"><small>${n}</small>${item?imageTag(item.id,'',item.name):'<span class="empty-gear">＋</span>'}<span>${item?item.name:'미착용'}</span></button>`}).join('')+'</div>'};
+ gearInventory=function(){
   if(!equipmentSlot)return '<p class="notice">장비 칸을 먼저 선택하세요. 해당 부위에 장착 가능한 보유 장비만 표시됩니다.</p>';
   const current=state.gear[selected]?.[equipmentSlot],group=items.filter(it=>state.inventory.includes(it.id)&&it.slot===equipmentSlot);
   let html=`<div class="slot-picker"><div class="sectionline"><strong>${slotNames[equipmentSlot]} 장비 선택</strong><small>${group.length}개 보유</small></div>`;
   if(current)html+=`<button data-v3-unequip="${equipmentSlot}">현재 장비 해제</button>`;
   html+=group.map(it=>{const owner=state.owned.find(id=>Object.values(state.gear[id]||{}).includes(it.id)),compatible=canEquip(selected,it);return `<div class="row">${imageTag(it.id,'',it.name)}<div class="grow"><strong>${it.name}</strong><p>${it.desc}</p><span class="dim">${owner?hero(owner).name+' 착용 중':'미착용'}</span></div><button data-equip="${it.id}" ${!compatible||current===it.id?'disabled':''}>${current===it.id?'착용 중':owner?'이전 장착':'장착'}</button></div>`}).join('');
   return html+(group.length?'':'<p class="dim">이 부위에 장착할 보유 장비가 없습니다.</p>')+'</div>';
- }
+ };
  equip=function(itemId){const it=items.find(x=>x.id===itemId),slot=equipmentSlot||it?.slot;if(!it||!slot||it.slot!==slot||!state.inventory.includes(itemId)||!state.owned.includes(selected)||!canEquip(selected,it))return;const eq=state.gear[selected]||(state.gear[selected]={});if(eq[slot]===itemId)delete eq[slot];else{for(const id of state.owned){const other=state.gear[id]||{};for(const k of Object.keys(other))if(other[k]===itemId)delete other[k]}eq[slot]=itemId}changed()};
  function patchEquipmentSummary(){if($('drawer').hidden||tab!=='영웅'||!detail)return;for(const card of $('content').querySelectorAll('.summary-card')){if(card.textContent.includes('장비 착용 상태')){const strong=card.querySelector('strong');if(strong)strong.textContent=`${Object.values(state.gear[selected]||{}).length} / 8 부위`}}}
  renderPanel=function(){phase3Render();patchEquipmentSummary();PixelArt.paint()};
