@@ -1,0 +1,8 @@
+/* Phase 3B progression / missions / gear quality */
+.phase3b-economy,.phase3b-missions,.phase3b-achievements,.phase3b-farm{margin:16px 0;padding:14px;border:1px solid #806f4f55;border-radius:10px;background:#122126cc}
+.phase3b-space{margin-top:18px}.economy-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:10px}.economy-grid>div{padding:10px;border:1px solid #ffffff12;border-radius:8px;background:#0c171a}.economy-grid small,.economy-grid b{display:block}.economy-grid small{font-size:9px;color:var(--muted)}.economy-grid b{margin-top:4px;color:#ecd39b}
+.mission-row,.achievement-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #ffffff0c}.mission-row:last-child,.achievement-row:last-child{border-bottom:0}.mission-row p,.achievement-row p{margin:3px 0 0;font-size:10px;color:var(--muted)}.mission-row button,.achievement-row button{flex:0 0 auto;white-space:nowrap}
+.mission-bar{height:4px;margin-top:7px;background:#0a1215;border-radius:4px;overflow:hidden}.mission-bar i{display:block;height:100%;background:linear-gradient(90deg,#8c6c3f,#e1bf77);border-radius:4px}
+.phase3b-gear-meta{margin-top:5px;font-size:10px;color:#b5c0bc}.gear-rarity{font-weight:800;letter-spacing:.04em}.rarity-common{color:#b7c0bd}.rarity-uncommon{color:#9fd08f}.rarity-rare{color:#8ebbe9}.rarity-epic{color:#c6a0ef}.rarity-legendary{color:#f2c568;text-shadow:0 0 12px #e5a84a55}
+.phase3b-farm .phase3-checkpoints{margin-top:10px}.phase3b-farm .primary{border-color:#e2bd77;background:#8b6134;color:#fff8e9}
+@media(max-width:720px){.economy-grid{grid-template-columns:1fr}.mission-row,.achievement-row{align-items:flex-start}.mission-row button,.achievement-row button{font-size:10px;padding:7px 8px}}
