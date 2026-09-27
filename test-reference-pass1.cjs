@@ -12,7 +12,7 @@ assert(css.includes('#v12BossBar'),'boss-bar relocation styling missing');
 assert(mobileFix.includes('html.force-landscape.v13-combat.wave-active header'),'mobile wallet/HUD visibility override missing');
 assert(mobileFix.includes('html.force-landscape.v13-combat.wave-active .shell'),'mobile fullscreen shell override missing');
 assert(js.includes('const laneScale=[.72,.82,.92,1.02,1.12]'),'five-lane perspective scale missing');
-assert(js.includes("[1,2,3].forEach"),'x1/x2/x3 presets missing');
+assert(js.includes('[1,2,3].forEach'),'x1/x2/x3 presets missing');
 assert(js.includes("['♙','영웅','영웅']"),'hero combat-dock entry missing');
 assert(js.includes("['☼','설정','설정']"),'settings combat-dock entry missing');
 assert(js.includes('return {x:front?270:182+(i%2)*24,y:lane}'),'defender line repositioning missing');
