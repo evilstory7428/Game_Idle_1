@@ -1,7 +1,8 @@
 'use strict';
-/* Phase 7 reference-match pass 1: battlefield composition, combat dock and speed presets. */
+/* Phase 7 reference-match pass 1: battlefield composition, depth, combat dock and speed presets. */
 (()=>{
  const lanes=window.SunsetV12?.lanes||[315,359,403,447,491];
+ const laneScale=[.72,.82,.92,1.02,1.12];
  const originalPosition=position;
  position=function(id){
   const i=Math.max(0,state.slots.indexOf(id));
@@ -10,6 +11,15 @@
   return {x:front?270:182+(i%2)*24,y:lane};
  };
  if(window.Game)Game.position=position;
+
+ const originalDrawEnemy=drawEnemy;
+ drawEnemy=function(e){
+  const lane=Number.isInteger(e?.lane)?Math.max(0,Math.min(4,e.lane)):2;
+  const s=e?.boss?Math.max(.9,laneScale[lane]):laneScale[lane];
+  const px=e?.x||0,py=e?.y||0;
+  ctx.save();ctx.translate(px,py);ctx.scale(s,s);ctx.translate(-px,-py);
+  originalDrawEnemy(e);ctx.restore();
+ };
 
  function makeSpeedDock(){
   if(document.getElementById('v13SpeedDock'))return;
@@ -55,5 +65,5 @@
   moveBossBar();syncSpeedDock();requestAnimationFrame(updateCombatMode);
  }
  makeSpeedDock();makeCombatDock();requestAnimationFrame(updateCombatMode);
- window.ReferencePass1={lanes,setSpeed};
+ window.ReferencePass1={lanes,laneScale,setSpeed};
 })();
