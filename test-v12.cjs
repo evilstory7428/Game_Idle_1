@@ -1,15 +1,17 @@
 // Zero-dependency V12 integration smoke test. Usage: node test-v12.cjs
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const read=f=>fs.readFileSync(path.join(__dirname,f),'utf8');
-const index=read('index.html'),runtime=read('phase6-v12.js'),css=read('phase6-v12.css'),ui=read('v12-live-fixes.css');
+const index=read('index.html'),runtime=read('phase6-v12.js'),lanes=read('v12-lane-normalizer.js'),css=read('phase6-v12.css'),ui=read('v12-live-fixes.css');
 assert(index.includes('assets/v12/atlas-chunks/part00.js'),'index missing V12 atlas part00');
 assert(index.includes('assets/v12/atlas-chunks/part01.js'),'index missing V12 atlas part01');
 assert(index.includes('phase6-v12.js'),'index missing exact V12 runtime');
+assert(index.includes('v12-lane-normalizer.js'),'index missing summoned-enemy lane normalizer');
 assert(index.includes('phase6-v12.css'),'index missing V12 CSS');
 assert(!index.includes('v12-project-runtime.js'),'fallback runtime must not be loaded with phase6-v12');
 assert(fs.existsSync(path.join(__dirname,'assets/v12/atlas-chunks/part00.js')),'missing atlas chunk part00');
 assert(fs.existsSync(path.join(__dirname,'assets/v12/atlas-chunks/part01.js')),'missing atlas chunk part01');
 assert(runtime.includes('const V12_LANES = [315,359,403,447,491]'),'five V12 lanes missing');
+assert(lanes.includes('enemies.forEach(normalizeEnemy)'),'summoned-enemy lane normalization missing');
 for(const hero of ['nancy','luna','elona','jessie','julie','chelly','tina'])assert(runtime.includes(hero),`hero atlas missing: ${hero}`);
 for(const id of ['boar_run','boar_death','wolf_run','wolf_death','cat_run','cat_death','caveman_run','caveman_death','zombie_run','zombie_death'])assert(runtime.includes(id),`enemy atlas motion missing: ${id}`);
 assert(runtime.includes('captureDeath'),'death capture logic missing');
@@ -19,4 +21,4 @@ assert(css.includes('#v12BossBar'),'boss HP bar CSS missing');
 assert(ui.includes('#pause{display:none'),'pause should be hidden');
 assert(ui.includes("#speed[data-v12-speed='2']"),'x2 speed UI missing');
 assert(ui.includes("#speed[data-v12-speed='3']"),'x3 speed UI missing');
-console.log(JSON.stringify({passed:true,lanes:5,heroes:7,enemyMotionPairs:5,atlasChunks:2},null,2));
+console.log(JSON.stringify({passed:true,lanes:5,heroes:7,enemyMotionPairs:5,atlasChunks:2,summonLaneNormalization:true},null,2));
