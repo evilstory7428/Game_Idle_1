@@ -1,0 +1,12 @@
+/* Phase 7 reference-match pass 2: impact polish and vector dock icons. */
+#v13CombatDock .v13-icon{width:24px;height:24px;display:grid;place-items:center;font-size:0!important;filter:drop-shadow(0 0 6px currentColor)}
+#v13CombatDock .v13-icon svg{width:23px;height:23px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;overflow:visible}
+#v13CombatDock button{transition:transform .12s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease}
+#v13CombatDock button:hover,#v13CombatDock button:focus-visible{background:linear-gradient(180deg,#1a2b4ceb,#0e1a34ee);box-shadow:inset 0 0 18px #5ca9ff16;outline:0}
+#v13CombatDock button:active{transform:translateY(1px) scale(.97)}
+#v13SpeedDock button{backdrop-filter:blur(8px)}
+html.v13-combat .battle:after{content:'';position:absolute;inset:0;pointer-events:none;z-index:10;background:linear-gradient(180deg,#08102010 0,#0000 24%,#0000 70%,#1b0f0817 100%);box-shadow:inset 0 0 90px #04070a22}
+html.v13-combat .battlehud,html.v13-combat #v12BossBar{z-index:22!important}
+html.v13-combat #v13SpeedDock,html.v13-combat #v13CombatDock,html.v13-combat .launcher{z-index:45!important}
+@media(max-width:900px),(max-height:520px){#v13CombatDock .v13-icon,#v13CombatDock .v13-icon svg{width:19px;height:19px}}
+@media(max-width:760px),(max-height:420px){#v13CombatDock .v13-icon,#v13CombatDock .v13-icon svg{width:17px;height:17px}}
