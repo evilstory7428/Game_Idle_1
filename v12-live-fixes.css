@@ -1,0 +1,14 @@
+/* V12 live overrides: latest mobile combat layout */
+#pause{display:none!important}
+.battle-controls{position:absolute!important;left:18px!important;bottom:18px!important;top:auto!important;right:auto!important;z-index:14!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+.battle-controls .live{display:none!important}
+#speed{width:62px!important;height:62px!important;min-width:62px!important;min-height:62px!important;padding:0!important;border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:0!important;background:radial-gradient(circle at 30% 25%,#7ad8ff 0,#3f88ff 45%,#5539ec 100%)!important;border:2px solid rgba(255,255,255,.42)!important;box-shadow:0 10px 26px rgba(24,45,110,.45),0 0 20px rgba(84,216,255,.28),inset 0 2px 8px rgba(255,255,255,.22)!important}
+#speed:after{content:'x1';font:900 18px/1 system-ui,-apple-system,Segoe UI,sans-serif;color:#fff;text-shadow:0 2px 8px #001}
+#speed[data-v12-speed='2']:after{content:'x2'}#speed[data-v12-speed='3']:after{content:'x3'}
+.wavebox{position:relative!important;overflow:visible!important}
+#v12BossBar{position:absolute;left:0;right:0;top:calc(100% + 10px);height:31px;padding-top:14px;pointer-events:none}
+#v12BossBar[hidden]{display:none!important}
+#v12BossBar span{position:absolute;top:0;left:2px;right:2px;text-align:left;font:900 9px/1 system-ui,sans-serif;letter-spacing:.12em;color:#ffd5d5;text-shadow:0 2px 8px #000}
+#v12BossBar:before{content:'';position:absolute;left:0;right:0;bottom:0;height:12px;border-radius:999px;background:rgba(38,2,7,.9);border:1px solid rgba(255,104,104,.48);box-shadow:0 4px 18px rgba(0,0,0,.38),inset 0 0 4px #000}
+#v12BossBar i{position:absolute;left:1px;bottom:1px;height:10px;border-radius:999px;background:linear-gradient(90deg,#780000,#d20818 45%,#ff3345 75%,#ff7a87);box-shadow:0 0 16px rgba(255,45,65,.5);transition:width .12s linear}
+@media(max-width:900px){#speed{width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important}#speed:after{font-size:15px}.battle-controls{left:12px!important;bottom:12px!important}}
